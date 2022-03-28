@@ -45,7 +45,7 @@ MemTable::MemTable(int64_t tablet_id, Schema* schema, const TabletSchema* tablet
           _table_mem_pool(new MemPool(_mem_tracker.get())),
           _schema_size(_schema->schema_size()),
           _rowset_writer(rowset_writer),
-          _is_first_insertion(true), 
+          _is_first_insertion(true),
           _agg_functions(schema->num_columns()),
           _mem_usage(0){
     if (support_vec){
@@ -68,8 +68,8 @@ MemTable::MemTable(int64_t tablet_id, Schema* schema, const TabletSchema* tablet
 
 void MemTable::_init_agg_functions(const vectorized::Block* block)
 {
-    
-    for (uint32_t cid = _schema->num_key_columns(); 
+
+    for (uint32_t cid = _schema->num_key_columns();
                 cid < _schema->num_columns();
                 ++cid) {
         FieldAggregationMethod agg_method =
@@ -83,7 +83,7 @@ void MemTable::_init_agg_functions(const vectorized::Block* block)
         }else{
             agg_name += "_reader";
         }
-        
+
         std::transform(agg_name.begin(), agg_name.end(), agg_name.begin(),
                         [](unsigned char c) { return std::tolower(c); });
 
@@ -123,9 +123,9 @@ int MemTable::RowCursorComparator::operator()(const char* left, const char* righ
 }
 
 int MemTable::RowInBlockComparator::operator()(const RowInBlock* left, const RowInBlock* right) const{
-    return _pblock->compare_at(left->_row_pos, right->_row_pos, 
-                            _schema->num_key_columns(), 
-                            *_pblock, -1); 
+    return _pblock->compare_at(left->_row_pos, right->_row_pos,
+                            _schema->num_key_columns(),
+                            *_pblock, -1);
 }
 
 void MemTable::insert(const vectorized::Block* block, size_t row_pos, size_t num_rows)
@@ -148,11 +148,11 @@ void MemTable::insert(const vectorized::Block* block, size_t row_pos, size_t num
     _mem_usage += newsize - oldsize;
     _mem_tracker->consume(newsize - oldsize);
 
-    for(int i = 0; i < num_rows; i++){       
+    for(int i = 0; i < num_rows; i++){
         RowInBlock* row_in_block_ptr = new RowInBlock(cursor_in_mutableblock + i);
         rowInBlocks.push_back(row_in_block_ptr);
         insert_one_row_from_block(row_in_block_ptr);
-    }   
+    }
 }
 
 void MemTable::insert_one_row_from_block(RowInBlock* row_in_block_ptr)
@@ -173,13 +173,13 @@ void MemTable::insert_one_row_from_block(RowInBlock* row_in_block_ptr)
         for ( auto cid = _schema->num_key_columns(); cid < _schema->num_columns(); cid++){
             auto col_ptr = _input_mutable_block.mutable_columns()[cid].get();
             auto place = row_in_block_ptr->_agg_places[cid];
-            _agg_functions[cid]->add(place, 
+            _agg_functions[cid]->add(place,
                     const_cast<const doris::vectorized::IColumn**>( &col_ptr),
                     row_in_block_ptr->_row_pos,
                     nullptr
                     );
         }
-        
+
         _vec_skip_list->InsertWithHint(row_in_block_ptr, is_exist, &_vec_hint);
     }
 }
@@ -254,21 +254,21 @@ void MemTable::_aggregate_two_rowInBlock(RowInBlock* new_row, RowInBlock* row_in
         }
     }
     //dst is non-sequence row, or dst sequence is smaller
-    for (uint32_t cid = _schema->num_key_columns(); 
+    for (uint32_t cid = _schema->num_key_columns();
                     cid < _schema->num_columns();
-                    ++cid) 
+                    ++cid)
     {
         auto place = row_in_skiplist->_agg_places[cid];
 
         auto col_ptr = _input_mutable_block.mutable_columns()[cid].get();
 
-        _agg_functions[cid]->add(place, 
+        _agg_functions[cid]->add(place,
                 const_cast<const doris::vectorized::IColumn**>( &col_ptr),
                 new_row->_row_pos,
                 nullptr
                 );
-    }   
-    
+    }
+
 }
 vectorized::Block MemTable::collect_skiplist_results()
 {
@@ -280,14 +280,14 @@ vectorized::Block MemTable::collect_skiplist_results()
         }
     }else{
         for (it.SeekToFirst(); it.Valid(); it.Next()) {
-            
+
             auto& block_data = in_block.get_columns_with_type_and_name();
             //move key columns
             for (size_t i = 0; i < _schema->num_key_columns(); ++i) {
                 _output_mutable_block.get_column_by_position(i)->insert_from(*block_data[i].column.get(), it.key()->_row_pos);
             }
             //get value columns from agg_places
-            
+
             for (size_t i = _schema->num_key_columns(); i < _schema->num_columns(); ++i) {
                 auto function = _agg_functions[i];
                 function->insert_result_into(it.key()->_agg_places[i] , *(_output_mutable_block.get_column_by_position(i)));

@@ -193,7 +193,6 @@ int VNodeChannel::try_send_and_fetch_status(RuntimeState* state,
     }
     return _send_finished ? 0 : 1;
 }
-
 void VNodeChannel::try_send_block(RuntimeState* state) {
     SCOPED_ATTACH_TASK_THREAD(state, _node_channel_tracker);
     SCOPED_ATOMIC_TIMER(&_actual_consume_ns);

@@ -163,6 +163,8 @@ private:
 
         inline OLAPStatus _merge_next(Block* block);
 
+        inline OLAPStatus _merge_next(Block* block);
+
         inline OLAPStatus _normal_next(Block* block);
 
         // Each LevelIterator corresponds to a rowset reader,

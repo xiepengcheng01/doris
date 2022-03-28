@@ -80,7 +80,7 @@ Status TabletsChannel::add_batch(const PTabletWriterAddBatchRequest& request,
     DCHECK(request.tablet_ids_size() == request.row_batch().num_rows());
     SCOPED_SWITCH_THREAD_LOCAL_MEM_TRACKER(_mem_tracker);
     int64_t cur_seq = 0;
-    
+
     auto status = _get_current_seq(cur_seq, request);
     if (UNLIKELY(!status.ok())) {
         return status;
@@ -108,7 +108,7 @@ Status TabletsChannel::add_batch(const PTabletWriterAddBatchRequest& request,
         }
     }
 
-    google::protobuf::RepeatedPtrField<PTabletError>* tablet_errors = response->mutable_tablet_errors(); 
+    google::protobuf::RepeatedPtrField<PTabletError>* tablet_errors = response->mutable_tablet_errors();
     for (const auto& tablet_to_rowidxs_it : tablet_to_rowidxs) {
         auto tablet_writer_it = _tablet_writers.find(tablet_to_rowidxs_it.first);
         if (tablet_writer_it == _tablet_writers.end()) {

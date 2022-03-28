@@ -41,7 +41,7 @@ class RowInBlock;
 class RowInBlockComparator;
 class MemTable {
 public:
-   
+
     MemTable(int64_t tablet_id, Schema* schema, const TabletSchema* tablet_schema,
              const std::vector<SlotDescriptor*>* slot_descs, TupleDescriptor* tuple_desc,
              KeysType keys_type, RowsetWriter* rowset_writer,
@@ -52,11 +52,11 @@ public:
     int64_t tablet_id() const { return _tablet_id; }
     size_t memory_usage() const { return _mem_tracker->consumption(); }
     std::shared_ptr<MemTracker> mem_tracker() { return _mem_tracker; }
-    
+
     void insert(const Tuple* tuple);
     //insert tuple from (row_pos) to (row_pos+num_rows)
     void insert(const vectorized::Block* block, size_t row_pos, size_t num_rows);
-    
+
     /// Flush
     OLAPStatus flush();
     OLAPStatus close();
@@ -143,7 +143,7 @@ public:
         Table::Iterator _it;
     };
 
-    
+
 private:
     void _tuple_to_row(const Tuple* tuple, ContiguousRow* row, MemPool* mem_pool);
     void _aggregate_two_row(const ContiguousRow& new_row, TableKey row_in_skiplist);
@@ -159,7 +159,7 @@ private:
     KeysType _keys_type;
 
     std::shared_ptr<RowComparator> _row_comparator;
-    
+
     std::shared_ptr<RowInBlockComparator> _vec_row_comparator;
 
     std::shared_ptr<MemTracker> _mem_tracker;
@@ -192,7 +192,7 @@ private:
     // in unique or aggragate key model.
     int64_t _rows = 0;
 
-    //for vectorized 
+    //for vectorized
     vectorized::MutableBlock _input_mutable_block;
     vectorized::MutableBlock _output_mutable_block;
     vectorized::Block collect_skiplist_results();
