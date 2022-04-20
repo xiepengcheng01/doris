@@ -27,8 +27,7 @@ using std::vector;
 namespace doris {
 
 Compaction::Compaction(TabletSharedPtr tablet, const std::string& label)
-        : _mem_tracker(
-                  MemTracker::create_tracker(-1, label, nullptr, MemTrackerLevel::INSTANCE)),
+        : _mem_tracker(MemTracker::create_tracker(-1, label, nullptr, MemTrackerLevel::INSTANCE)),
           _tablet(tablet),
           _input_rowsets_size(0),
           _input_row_num(0),
@@ -87,7 +86,7 @@ OLAPStatus Compaction::do_compaction_impl(int64_t permits) {
     // 2. write merged rows to output rowset
     // The test results show that merger is low-memory-footprint, there is no need to tracker its mem pool
     Merger::Statistics stats;
-    auto res = Merger::merge_rowsets(_tablet, compaction_type(), _input_rs_readers,
+    auto res = Merger::vmerge_rowsets(_tablet, compaction_type(), _input_rs_readers,
                                      _output_rs_writer.get(), &stats);
     if (res != OLAP_SUCCESS) {
         LOG(WARNING) << "fail to do " << compaction_name() << ". res=" << res
@@ -129,7 +128,7 @@ OLAPStatus Compaction::do_compaction_impl(int64_t permits) {
 
     int64_t current_max_version;
     {
-        ReadLock rdlock(_tablet->get_header_lock());
+        std::shared_lock rdlock(_tablet->get_header_lock());
         current_max_version = _tablet->rowset_with_max_version()->end_version();
     }
 
@@ -179,7 +178,7 @@ void Compaction::modify_rowsets() {
     std::vector<RowsetSharedPtr> output_rowsets;
     output_rowsets.push_back(_output_rowset);
 
-    WriteLock wrlock(_tablet->get_header_lock());
+    std::lock_guard<std::shared_mutex> wrlock(_tablet->get_header_lock());
     _tablet->modify_rowsets(output_rowsets, _input_rowsets);
     _tablet->save_meta();
 }

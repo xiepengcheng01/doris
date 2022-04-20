@@ -91,16 +91,12 @@ private:
                                  TabletSchema& tablet_schema, const RowsetId& next_id,
                                  RowsetMetaPB* new_rs_meta_pb);
 
-    OLAPStatus _convert_beta_rowsets_to_alpha(const TabletMetaSharedPtr& new_tablet_meta,
-                                              const vector<RowsetMetaSharedPtr>& rowset_metas,
-                                              const FilePathDesc& dst_path_desc);
-
 private:
     static SnapshotManager* _s_instance;
     static std::mutex _mlock;
 
     // snapshot
-    Mutex _snapshot_mutex;
+    std::mutex _snapshot_mutex;
     uint64_t _snapshot_base_id;
 
     std::shared_ptr<MemTracker> _mem_tracker = nullptr;

@@ -96,7 +96,8 @@ enum TStorageBackendType {
     BROKER,
     S3,
     HDFS,
-    LOCAL
+    LOCAL,
+    OFS
 }
 
 struct TScalarType {
