@@ -40,6 +40,7 @@ public:
     virtual Status close(RuntimeState* state) override;
 
 private:
+    Status push_block_queue();
     virtual Status start_scanners() override;
 
     void scanner_worker(int start_idx, int length);
@@ -48,6 +49,7 @@ private:
                         ScannerCounter* counter);
 
     std::deque<std::shared_ptr<vectorized::Block>> _block_queue;
+    std::unique_ptr<MutableBlock> _mutable_block;
 };
 } // namespace vectorized
 } // namespace doris
