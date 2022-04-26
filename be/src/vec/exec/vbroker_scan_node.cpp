@@ -188,7 +188,6 @@ Status VBrokerScanNode::push_block_queue() {
     block_ptr->swap(std::move(output_block));
 
     _mutable_block->set_muatable_columns(block_ptr->clone_empty_columns());
-    LOG(INFO) << "output_block rows:" << block_ptr->rows();
 
     std::unique_lock<std::mutex> l(_batch_queue_lock);
     while (_process_status.ok() && !_scan_finished.load() &&
